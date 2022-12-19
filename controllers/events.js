@@ -1,8 +1,6 @@
 const { response } = require('express');
 const Evento = require('../models/Evento')
 
-
-
 const obtenerEventos = async ( req, res = response ) => {
 
     const eventos = await Evento.find()
@@ -38,12 +36,6 @@ const crearEvento = async( req, res = response ) => {
             msg: 'Ha ocurrido un error, intentelo más tarde.'
         })
     }
-
-    return res.status(200).json({
-        ok:true,
-        msg: 'Crear Evento'
-    })
-
 }
 
 const actualizarEvento = async( req, res = response ) => {
@@ -76,9 +68,9 @@ const actualizarEvento = async( req, res = response ) => {
 
         const eventoActualizado = await Evento.findByIdAndUpdate( evento.id, nuevoEvento, { new: true } ); //El new: true, es para que la respuesta de esta linea sea la actualizacion, y no los valores anteriores como lo devolvería si se dejara por defecto
 
-        return res.json({
+        res.json({
             ok: true,
-            eventoActualizado
+            evento: eventoActualizado
         })
             
     } catch (error) {
@@ -88,9 +80,6 @@ const actualizarEvento = async( req, res = response ) => {
             msg: 'Error, intentelo más tarde.'
         });        
     }
-
-    
-
 }
 
 const eliminarEvento = async ( req, res = response ) => {
@@ -101,16 +90,16 @@ const eliminarEvento = async ( req, res = response ) => {
     try {
 
         const evento = await Evento.findById( eventoId );
-
+        
         if ( !evento ) {
             return res.status(404).json({
                 ok: false,
                 msg: 'El evento no existe'
             });
         }
-
+        
         if( evento.user.toString() !== uid ){
-            return res.json({ 
+            return res.status(401).json({ 
                 ok: false,
                 msg: 'No tiene privilegios para eliminar este evento.'
             })
@@ -118,7 +107,7 @@ const eliminarEvento = async ( req, res = response ) => {
 
         const eventoEliminado = await Evento.findByIdAndDelete( eventoId );
 
-        return res.json({
+        res.json({
             ok: true,
             msg: 'El Evento se ha eliminado correctamente',
             eventoEliminado,
@@ -126,20 +115,13 @@ const eliminarEvento = async ( req, res = response ) => {
         
     } catch (error) {
         console.log(error);
-        res.json({
+        res.status(500).json({
             ok: false,
-            msg: 'Ha ocurrido un error, intentelo más tarde'
-        })        
+            msg: 'Error, intentelo más tarde.'
+        });             
     }
 
-    return res.status(200).json({
-        ok: true,
-        msg: 'Eliminar Evento'
-    })
-
 }
-
-
 
 module.exports = {
     obtenerEventos,
